@@ -4,3 +4,5 @@ out/
 .vscode-test/
 .DS_Store
 npm-debug.log*
+__pycache__/
+*.pyc

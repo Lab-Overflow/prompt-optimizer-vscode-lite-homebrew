@@ -7,3 +7,12 @@ README_DEV.md
 README.github.md
 README.marketplace.md
 .claude/**
+AGENTS.md
+CLAUDE.md
+scripts/__pycache__/**
+scripts/generate_icon.py
+scripts/package-marketplace.js
+scripts/smoke_test_fallback.py
+scripts/test_*.py
+scripts/validate-publish-package.js
+homebrew/**

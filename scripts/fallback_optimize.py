@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Local fallback optimizer for Prompt Optimizer Lite.
+Local fallback optimizer for Prompt Optimizer Mini.
 
 This script is intentionally dependency-free so it works in constrained
 environments when LM API calls fail (authorization/network/quota issues).

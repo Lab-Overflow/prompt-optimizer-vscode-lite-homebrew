@@ -1,13 +1,13 @@
 {
-  "name": "prompt-optimizer-vscode-lite",
-  "displayName": "Prompt Optimizer Lite",
-  "description": "Use current VS Code chat model to optimize prompts, with local Python fallback when model invocation fails.",
-  "version": "1.1.2",
-  "publisher": "lab-overflow",
+  "name": "prompt-optimizer-mini",
+  "displayName": "Prompt Optimizer Mini",
+  "description": "Lightweight prompt optimizer with model routing, optional OpenAI-compatible APIs, and an on-demand local GGUF model.",
+  "version": "1.0.0",
+  "publisher": "fullstack1ape",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Lab-Overflow/prompt-optimizer-lite"
+    "url": "https://github.com/Lab-Overflow/prompt-optimizer-vscode-lite-homebrew"
   },
   "icon": "icon.png",
   "engines": {
@@ -27,15 +27,41 @@
     "claude"
   ],
   "activationEvents": [
-    "onChatParticipant:prompt-optimizer-lite.promptOptimizer",
-    "onCommand:promptOptimizerLite.optimizeSelection"
+    "onChatParticipant:prompt-optimizer-mini.promptOptimizer",
+    "onCommand:promptOptimizerLite.optimizeSelection",
+    "onCommand:promptOptimizerLite.chooseModelRoute",
+    "onCommand:promptOptimizerLite.setupLocalModel",
+    "onCommand:promptOptimizerLite.configureExternalModel",
+    "onCommand:promptOptimizerLite.showModelStatus",
+    "onCommand:promptOptimizerLite.setupAgentAdapters",
+    "onStartupFinished"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "promptOptimizerLite.optimizeSelection",
-        "title": "Prompt Optimizer Lite: Optimize Prompt"
+        "title": "Prompt Optimizer Mini: Optimize Prompt"
+      },
+      {
+        "command": "promptOptimizerLite.chooseModelRoute",
+        "title": "Prompt Optimizer Mini: Choose Model Route"
+      },
+      {
+        "command": "promptOptimizerLite.setupLocalModel",
+        "title": "Prompt Optimizer Mini: Setup Local Model"
+      },
+      {
+        "command": "promptOptimizerLite.configureExternalModel",
+        "title": "Prompt Optimizer Mini: Configure OpenAI-compatible Model"
+      },
+      {
+        "command": "promptOptimizerLite.showModelStatus",
+        "title": "Prompt Optimizer Mini: Show Model Status"
+      },
+      {
+        "command": "promptOptimizerLite.setupAgentAdapters",
+        "title": "Prompt Optimizer Mini: Enable Codex / Claude Code Adapters"
       }
     ],
     "menus": {
@@ -49,15 +75,15 @@
     },
     "chatParticipants": [
       {
-        "id": "prompt-optimizer-lite.promptOptimizer",
+        "id": "prompt-optimizer-mini.promptOptimizer",
         "name": "promptopt",
-        "fullName": "Prompt Optimizer Lite",
+        "fullName": "Prompt Optimizer Mini",
         "description": "Optimize rough prompts into senior prompt-engineer quality. Type @promptopt followed by your rough idea to get an execution-ready prompt.",
         "isSticky": true
       }
     ],
     "configuration": {
-      "title": "Prompt Optimizer Lite",
+      "title": "Prompt Optimizer Mini",
       "properties": {
         "promptOptimizerLite.replaceSelection": {
           "type": "boolean",
@@ -68,6 +94,62 @@
           "type": "string",
           "default": "",
           "description": "Optional python command override. Example: /usr/bin/python3"
+        },
+        "promptOptimizerLite.modelRoute": {
+          "type": "string",
+          "default": "auto",
+          "enum": [
+            "auto",
+            "vscode",
+            "external",
+            "local",
+            "template"
+          ],
+          "enumDescriptions": [
+            "Use configured OpenAI-compatible API, then VS Code Chat, local model, and template fallback.",
+            "Use VS Code Chat model, then fall back to local model and templates.",
+            "Use configured OpenAI-compatible API, then fall back to local model and templates.",
+            "Use the local model, then fall back to templates.",
+            "Use the fast dependency-free template formatter only."
+          ],
+          "description": "Model router strategy."
+        },
+        "promptOptimizerLite.externalBaseUrl": {
+          "type": "string",
+          "default": "",
+          "description": "OpenAI-compatible API base URL, such as https://api.example.com/v1. Store API key with the configuration command."
+        },
+        "promptOptimizerLite.externalModel": {
+          "type": "string",
+          "default": "",
+          "description": "Model name for the OpenAI-compatible API."
+        },
+        "promptOptimizerLite.autoDownloadLocalModel": {
+          "type": "boolean",
+          "default": true,
+          "description": "Download the compact local GGUF model and llama.cpp runtime on demand when no usable route is available."
+        },
+        "promptOptimizerLite.localTemplate": {
+          "type": "string",
+          "default": "auto",
+          "enum": [
+            "auto",
+            "general",
+            "variables",
+            "review",
+            "text2image"
+          ],
+          "description": "Few-shot template used by the local model. Auto classifies the prompt."
+        },
+        "promptOptimizerLite.showOptimizationTrace": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the original prompt and selected model route alongside the optimized prompt in chat and preview views."
+        },
+        "promptOptimizerLite.offerAgentAdapterSetup": {
+          "type": "boolean",
+          "default": true,
+          "description": "Offer to add managed PromptOpt adapter blocks for Codex and Claude Code when a workspace opens."
         }
       }
     }
@@ -76,9 +158,9 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "prepackage": "cp README.md README.github.md && cp README.marketplace.md README.md",
-    "package": "vsce package",
-    "postpackage": "cp README.github.md README.md && rm README.github.md"
+    "package": "node scripts/package-marketplace.js",
+    "package:raw": "vsce package",
+    "validate:publish": "node scripts/validate-publish-package.js"
   },
   "devDependencies": {
     "@types/node": "20.x",

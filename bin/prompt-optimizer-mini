@@ -1,0 +1,217 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
+from typing import Iterable, Optional
+
+
+APP = "PromptOpt"
+
+FRAMES = [
+    r"""
+   ____  ____   ___  __  __ ____ _____
+  |  _ \|  _ \ / _ \|  \/  |  _ \_   _|
+  | |_) | |_) | | | | |\/| | |_) || |
+  |  __/|  _ <| |_| | |  | |  __/ | |
+  |_|   |_| \_\\___/|_|  |_|_|    |_|
+        optimizer core warming up
+""",
+    r"""
+   ____  ____   ___  __  __ ____ _____
+  |  _ \|  _ \ / _ \|  \/  |  _ \_   _|
+  | |_) | |_) | | | | |\/| | |_) || |
+  |  __/|  _ <| |_| | |  | |  __/ | |
+  |_|   |_| \_\\___/|_|  |_|_|    |_|
+        routing models  [local/API/VS Code]
+""",
+    r"""
+   ____  ____   ___  __  __ ____ _____
+  |  _ \|  _ \ / _ \|  \/  |  _ \_   _|
+  | |_) | |_) | | | | |\/| | |_) || |
+  |  __/|  _ <| |_| | |  | |  __/ | |
+  |_|   |_| \_\\___/|_|  |_|_|    |_|
+        prompts sharpened, ready to launch
+""",
+]
+
+
+def install_root() -> Path:
+    env_root = (
+        os.environ.get("PROMPT_OPTIMIZER_INSTALL_ROOT", "").strip()
+        or os.environ.get("PROMPT_OPTIMIZER_LITE_INSTALL_ROOT", "").strip()
+    )
+    if env_root:
+        return Path(env_root).expanduser()
+    return Path(__file__).resolve().parent.parent
+
+
+def package_version(root: Path) -> str:
+    package = root / "package.json"
+    if package.is_file():
+        try:
+            return json.loads(package.read_text(encoding="utf-8")).get("version", "unknown")
+        except (OSError, ValueError):
+            pass
+    return os.environ.get("PROMPT_OPTIMIZER_VERSION") or os.environ.get("PROMPT_OPTIMIZER_LITE_VERSION", "unknown")
+
+
+def vsix_path(root: Path) -> Optional[Path]:
+    configured = (
+        os.environ.get("PROMPT_OPTIMIZER_VSIX", "").strip()
+        or os.environ.get("PROMPT_OPTIMIZER_LITE_VSIX", "").strip()
+    )
+    if configured and Path(configured).expanduser().is_file():
+        return Path(configured).expanduser()
+    versioned = root / f"prompt-optimizer-mini-{package_version(root)}.vsix"
+    if versioned.is_file():
+        return versioned
+    candidates = sorted(root.glob("prompt-optimizer-mini-*.vsix"))
+    if candidates:
+        return candidates[-1]
+    libexec_versioned = root / "libexec" / f"prompt-optimizer-mini-{package_version(root)}.vsix"
+    if libexec_versioned.is_file():
+        return libexec_versioned
+    libexec_candidates = sorted((root / "libexec").glob("prompt-optimizer-mini-*.vsix"))
+    return libexec_candidates[-1] if libexec_candidates else None
+
+
+def local_manager(root: Path) -> Path:
+    return root / "scripts" / "local_model_manager.py"
+
+
+def show_banner(force: bool = False) -> None:
+    if not force and not sys.stdout.isatty():
+        print("PromptOpt :: local model router")
+        return
+    for frame in FRAMES:
+        print("\033[2J\033[H", end="")
+        print(frame)
+        time.sleep(0.16)
+    print("\033[2J\033[H", end="")
+    print(FRAMES[-1])
+
+
+def run_python_script(root: Path, args: list[str], stdin: str = "") -> int:
+    manager = local_manager(root)
+    if not manager.is_file():
+        print(f"Cannot find local model manager: {manager}", file=sys.stderr)
+        return 2
+    python = os.environ.get("PYTHON", "python3")
+    proc = subprocess.run([python, str(manager), *args], input=stdin, text=True, check=False)
+    return proc.returncode
+
+
+def read_stdin_if_needed(values: list[str]) -> str:
+    if values:
+        return " ".join(values)
+    if not sys.stdin.isatty():
+        return sys.stdin.read()
+    return ""
+
+
+def install_extension(root: Path) -> int:
+    code = shutil.which("code")
+    if not code:
+        print("VS Code CLI 'code' was not found in PATH.", file=sys.stderr)
+        print("In VS Code, run: Shell Command: Install 'code' command in PATH", file=sys.stderr)
+        return 2
+    package = vsix_path(root)
+    if not package:
+        print("Cannot find prompt-optimizer-mini VSIX.", file=sys.stderr)
+        return 2
+    print(f"Installing VS Code extension from {package}")
+    return subprocess.run([code, "--install-extension", str(package)], check=False).returncode
+
+
+def doctor(root: Path) -> int:
+    checks = {
+        "install_root": str(root),
+        "version": package_version(root),
+        "python3": shutil.which("python3") or "",
+        "code": shutil.which("code") or "",
+        "local_model_manager": str(local_manager(root)) if local_manager(root).is_file() else "",
+        "vsix": str(vsix_path(root) or ""),
+    }
+    for key, value in checks.items():
+        status = "ok" if value else "missing"
+        print(f"{key:20} {status:8} {value}")
+    return 0 if all(checks.values()) else 1
+
+
+def print_help(root: Path) -> None:
+    version = package_version(root)
+    command = (
+        os.environ.get("PROMPT_OPTIMIZER_COMMAND")
+        or os.environ.get("PROMPT_OPTIMIZER_LITE_COMMAND")
+        or Path(sys.argv[0]).name
+        or "promptopt"
+    )
+    print(
+        f"""{APP} {version}
+
+Usage:
+  {command} install-extension
+  {command} status
+  {command} render-prompt <raw prompt>
+  {command} optimize <raw prompt>
+  {command} doctor
+  {command} version
+
+Examples:
+  {command} install-extension
+  {command} render-prompt "请作为红队审查这个产品发布计划"
+  echo "画一座漂浮在夜空中的图书馆" | {command} render-prompt
+"""
+    )
+
+
+def main(argv: Optional[Iterable[str]] = None) -> int:
+    root = install_root()
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("command", nargs="?")
+    parser.add_argument("values", nargs=argparse.REMAINDER)
+    parser.add_argument("--no-animation", action="store_true")
+    args = parser.parse_args(list(argv) if argv is not None else None)
+
+    if args.command in (None, "help", "--help", "-h"):
+        show_banner(not args.no_animation)
+        print_help(root)
+        return 0
+    if args.command == "version":
+        print(package_version(root))
+        return 0
+    if args.command == "doctor":
+        show_banner(not args.no_animation)
+        return doctor(root)
+    if args.command == "install-extension":
+        show_banner(not args.no_animation)
+        return install_extension(root)
+    if args.command == "status":
+        return run_python_script(root, ["status"])
+    if args.command == "render-prompt":
+        source = read_stdin_if_needed(args.values).strip()
+        if not source:
+            print("render-prompt requires prompt text or stdin.", file=sys.stderr)
+            return 2
+        return run_python_script(root, ["render-prompt", "--stdin"], source)
+    if args.command == "optimize":
+        source = read_stdin_if_needed(args.values).strip()
+        if not source:
+            print("optimize requires prompt text or stdin.", file=sys.stderr)
+            return 2
+        show_banner(not args.no_animation)
+        return run_python_script(root, ["optimize", "--stdin"], source)
+    print(f"Unknown command: {args.command}", file=sys.stderr)
+    print_help(root)
+    return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
