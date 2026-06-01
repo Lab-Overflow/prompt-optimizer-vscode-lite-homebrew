@@ -27,7 +27,7 @@ python3 -B -m unittest scripts/test_promptopt_stability.py scripts/test_agent_pr
 
 ### From Homebrew Tap
 
-After the `v1.0.0` release and tap are published:
+After the `v1.0.1` release and tap are published:
 
 ```bash
 brew tap Lab-Overflow/prompt-optimizer
@@ -46,7 +46,7 @@ promptopt install-extension
 
 ```bash
 npm run package
-code --install-extension prompt-optimizer-mini-1.0.0.vsix
+code --install-extension prompt-optimizer-mini-1.0.1.vsix
 ```
 
 ## Features

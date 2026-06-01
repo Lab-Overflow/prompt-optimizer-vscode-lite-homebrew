@@ -15,30 +15,76 @@ from typing import Iterable, Optional
 APP = "PromptOpt"
 
 FRAMES = [
-    r"""
-   ____  ____   ___  __  __ ____ _____
-  |  _ \|  _ \ / _ \|  \/  |  _ \_   _|
-  | |_) | |_) | | | | |\/| | |_) || |
-  |  __/|  _ <| |_| | |  | |  __/ | |
-  |_|   |_| \_\\___/|_|  |_|_|    |_|
-        optimizer core warming up
-""",
-    r"""
-   ____  ____   ___  __  __ ____ _____
-  |  _ \|  _ \ / _ \|  \/  |  _ \_   _|
-  | |_) | |_) | | | | |\/| | |_) || |
-  |  __/|  _ <| |_| | |  | |  __/ | |
-  |_|   |_| \_\\___/|_|  |_|_|    |_|
-        routing models  [local/API/VS Code]
-""",
-    r"""
-   ____  ____   ___  __  __ ____ _____
-  |  _ \|  _ \ / _ \|  \/  |  _ \_   _|
-  | |_) | |_) | | | | |\/| | |_) || |
-  |  __/|  _ <| |_| | |  | |  __/ | |
-  |_|   |_| \_\\___/|_|  |_|_|    |_|
-        prompts sharpened, ready to launch
-""",
+    (
+        r"""
+  .----------------------------------------------------------------.
+  |  ____                           _    ___        _              |
+  | |  _ \ _ __ ___  _ __ ___  _ __ | |_ / _ \ _ __ | |_           |
+  | | |_) | '__/ _ \| '_ ` _ \| '_ \| __| | | | '_ \| __|          |
+  | |  __/| | | (_) | | | | | | |_) | |_| |_| | |_) | |_           |
+  | |_|   |_|  \___/|_| |_| |_| .__/ \__|\___/| .__/ \__|          |
+  |                           |_|             |_|                  |
+  |----------------------------------------------------------------|
+  | [>] ignition      [ ] route matrix   [ ] prompt forge          |
+  |                                                                |
+  |        /\        homebrew cli core warming up                  |
+  |   ____/  \____   zero bundled models / zero node runtime       |
+  '----------------------------------------------------------------'
+"""
+    ),
+    (
+        r"""
+  .----------------------------------------------------------------.
+  |  ____                           _    ___        _              |
+  | |  _ \ _ __ ___  _ __ ___  _ __ | |_ / _ \ _ __ | |_           |
+  | | |_) | '__/ _ \| '_ ` _ \| '_ \| __| | | | '_ \| __|          |
+  | |  __/| | | (_) | | | | | | |_) | |_| |_| | |_) | |_           |
+  | |_|   |_|  \___/|_| |_| |_| .__/ \__|\___/| .__/ \__|          |
+  |                           |_|             |_|                  |
+  |----------------------------------------------------------------|
+  | [=] ignition      [>] route matrix   [ ] prompt forge          |
+  |                                                                |
+  |   [api]----\                                                   |
+  |   [vsc]-----+====> selecting fastest available route           |
+  |   [local]--/                                                   |
+  '----------------------------------------------------------------'
+"""
+    ),
+    (
+        r"""
+  .----------------------------------------------------------------.
+  |  ____                           _    ___        _              |
+  | |  _ \ _ __ ___  _ __ ___  _ __ | |_ / _ \ _ __ | |_           |
+  | | |_) | '__/ _ \| '_ ` _ \| '_ \| __| | | | '_ \| __|          |
+  | |  __/| | | (_) | | | | | | |_) | |_| |_| | |_) | |_           |
+  | |_|   |_|  \___/|_| |_| |_| .__/ \__|\___/| .__/ \__|          |
+  |                           |_|             |_|                  |
+  |----------------------------------------------------------------|
+  | [=] ignition      [=] route matrix   [>] prompt forge          |
+  |                                                                |
+  |       .---- constraints ----.                                  |
+  | raw --+---- structure ------+--> execution-ready prompt         |
+  |       '---- verification ---'                                  |
+  '----------------------------------------------------------------'
+"""
+    ),
+    (
+        r"""
+  .----------------------------------------------------------------.
+  |  ____                           _    ___        _              |
+  | |  _ \ _ __ ___  _ __ ___  _ __ | |_ / _ \ _ __ | |_           |
+  | | |_) | '__/ _ \| '_ ` _ \| '_ \| __| | | | '_ \| __|          |
+  | |  __/| | | (_) | | | | | | |_) | |_| |_| | |_) | |_           |
+  | |_|   |_|  \___/|_| |_| |_| .__/ \__|\___/| .__/ \__|          |
+  |                           |_|             |_|                  |
+  |----------------------------------------------------------------|
+  | [OK] ignition     [OK] route matrix  [OK] prompt forge         |
+  |                                                                |
+  |   >>>>>>>>>>>>>>>>>>> PROMPTOPT ONLINE <<<<<<<<<<<<<<<<<<       |
+  |          homebrew-native / lightweight / ready                  |
+  '----------------------------------------------------------------'
+"""
+    ),
 ]
 
 
@@ -66,16 +112,23 @@ def local_manager(root: Path) -> Path:
     return root / "scripts" / "local_model_manager.py"
 
 
-def show_banner(force: bool = False) -> None:
-    if not force and not sys.stdout.isatty():
-        print("PromptOpt :: local model router")
+def show_banner(enabled: bool = True) -> None:
+    if not enabled:
         return
+    stream = sys.stderr
+    if not stream.isatty():
+        print("PromptOpt :: homebrew-native prompt forge online", file=stream)
+        return
+    clear = "\033[2J\033[H"
+    cyan = "\033[96m" if not os.environ.get("NO_COLOR") else ""
+    green = "\033[92m" if not os.environ.get("NO_COLOR") else ""
+    reset = "\033[0m" if not os.environ.get("NO_COLOR") else ""
     for frame in FRAMES:
-        print("\033[2J\033[H", end="")
-        print(frame)
-        time.sleep(0.16)
-    print("\033[2J\033[H", end="")
-    print(FRAMES[-1])
+        print(clear, end="", file=stream)
+        print(f"{cyan}{frame}{reset}", file=stream)
+        time.sleep(0.12)
+    print(clear, end="", file=stream)
+    print(f"{green}{FRAMES[-1]}{reset}", file=stream)
 
 
 def run_python_script(root: Path, args: list[str], stdin: str = "") -> int:
@@ -160,18 +213,17 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
     parser.add_argument("--no-animation", action="store_true")
     args = parser.parse_args(raw_argv)
 
+    show_banner(not no_animation)
+
     if args.command in (None, "help", "--help", "-h"):
-        show_banner(not no_animation)
         print_help(root)
         return 0
     if args.command == "version":
         print(package_version(root))
         return 0
     if args.command == "doctor":
-        show_banner(not no_animation)
         return doctor(root)
     if args.command == "install-extension":
-        show_banner(not no_animation)
         return install_extension(root)
     if args.command == "status":
         return run_python_script(root, ["status"])
@@ -186,7 +238,6 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
         if not source:
             print("optimize requires prompt text or stdin.", file=sys.stderr)
             return 2
-        show_banner(not no_animation)
         return run_python_script(root, ["optimize", "--stdin"], source)
     print(f"Unknown command: {args.command}", file=sys.stderr)
     print_help(root)

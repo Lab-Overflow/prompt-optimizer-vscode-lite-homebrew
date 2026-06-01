@@ -26,7 +26,7 @@ Search **"Prompt Optimizer Mini"** in VS Code Extensions, or install from [Marke
 
 ### From Homebrew Tap
 
-After the `v1.0.0` release and tap are published:
+After the `v1.0.1` release and tap are published:
 
 ```bash
 brew tap Lab-Overflow/prompt-optimizer
@@ -64,7 +64,7 @@ python3 -B -m unittest scripts/test_promptopt_stability.py scripts/test_agent_pr
 
 ```bash
 npm run package
-code --install-extension prompt-optimizer-mini-1.0.0.vsix
+code --install-extension prompt-optimizer-mini-1.0.1.vsix
 ```
 
 ## Quick Demo
