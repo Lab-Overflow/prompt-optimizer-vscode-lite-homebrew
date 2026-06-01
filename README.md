@@ -30,11 +30,16 @@ After the `v1.0.0` release and tap are published:
 
 ```bash
 brew tap Lab-Overflow/prompt-optimizer
-brew install prompt-optimizer-mini
-promptopt install-extension
+brew install prompt-optimizer-lite
 ```
 
-Run `promptopt` to see the ASCII startup animation and CLI commands. The longer `prompt-optimizer-mini` command is also available.
+Homebrew installs the lightweight CLI only: no VSIX, Node dependencies, build output, icon assets, or model weights are included. Run `promptopt` to see the ASCII startup animation and CLI commands. The longer `prompt-optimizer-mini` and compatibility `prompt-optimizer-lite` commands are also available.
+
+Optional VS Code extension install:
+
+```bash
+promptopt install-extension
+```
 
 Agent-style usage in Codex or Claude Code:
 

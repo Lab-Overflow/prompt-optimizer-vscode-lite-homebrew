@@ -159,6 +159,7 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "package": "node scripts/package-marketplace.js",
+    "package:homebrew": "node scripts/package-homebrew.js",
     "package:raw": "vsce package",
     "validate:publish": "node scripts/validate-publish-package.js"
   },

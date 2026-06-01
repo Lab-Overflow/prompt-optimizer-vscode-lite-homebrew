@@ -31,11 +31,16 @@ After the `v1.0.0` release and tap are published:
 
 ```bash
 brew tap Lab-Overflow/prompt-optimizer
-brew install prompt-optimizer-mini
-promptopt install-extension
+brew install prompt-optimizer-lite
 ```
 
-Homebrew also exposes the longer `prompt-optimizer-mini` command.
+Homebrew installs the lightweight CLI only: no VSIX, Node dependencies, build output, icon assets, or model weights are included. It exposes `promptopt`, `prompt-optimizer-mini`, and `prompt-optimizer-lite`.
+
+Optional VS Code extension install:
+
+```bash
+promptopt install-extension
+```
 
 ### Build and Install VSIX
 

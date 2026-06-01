@@ -4,28 +4,28 @@ This folder contains the formula for publishing Prompt Optimizer Lite through a 
 
 ## Release Flow
 
-1. Build the VSIX:
+1. Build the Homebrew release tarball:
 
 ```bash
-npm run package
+npm run package:homebrew
 ```
 
 2. Create a GitHub release named `v1.0.0` and upload:
 
 ```text
-prompt-optimizer-mini-1.0.0.vsix
+prompt-optimizer-lite-1.0.0.tar.gz
 ```
 
-3. Verify the final VSIX SHA matches the formula:
+3. Verify the final tarball SHA matches the formula:
 
 ```bash
-shasum -a 256 prompt-optimizer-mini-1.0.0.vsix
+shasum -a 256 prompt-optimizer-lite-1.0.0.tar.gz
 ```
 
 Expected SHA for the current package:
 
 ```text
-a09ae551fa0849f9d829b9d84b52317ef391b91435e7b4dc74e808dbc47fdfaf
+68bef1b72b6c22f16bf3fdb6bd2c6db77a8ace4d949fef39fc8fdcc0c28b2917
 ```
 
 4. Copy the formula into your tap repository:
@@ -43,4 +43,4 @@ promptopt install-extension
 promptopt doctor
 ```
 
-The CLI exposes `promptopt`, `prompt-optimizer-mini`, and `prompt-optimizer-lite`. Interactive commands show an ASCII startup animation and can also run local status and prompt rendering checks.
+The CLI exposes `promptopt`, `prompt-optimizer-mini`, and `prompt-optimizer-lite`. The Homebrew artifact contains only the CLI scripts, Python fallback, and templates; it does not ship the VSIX, Node dependencies, build output, icon assets, or model weights.

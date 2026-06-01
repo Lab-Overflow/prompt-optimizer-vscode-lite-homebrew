@@ -1,28 +1,28 @@
 class PromptOptimizerLite < Formula
-  desc "Lightweight prompt optimizer CLI and VS Code extension installer"
+  desc "Lightweight prompt optimizer CLI"
   homepage "https://github.com/Lab-Overflow/prompt-optimizer-vscode-lite-homebrew"
-  url "https://github.com/Lab-Overflow/prompt-optimizer-vscode-lite-homebrew/releases/download/v1.0.0/prompt-optimizer-mini-1.0.0.vsix"
-  sha256 "a09ae551fa0849f9d829b9d84b52317ef391b91435e7b4dc74e808dbc47fdfaf"
+  url "https://github.com/Lab-Overflow/prompt-optimizer-vscode-lite-homebrew/releases/download/v1.0.0/prompt-optimizer-lite-1.0.0.tar.gz"
+  sha256 "68bef1b72b6c22f16bf3fdb6bd2c6db77a8ace4d949fef39fc8fdcc0c28b2917"
   license "Apache-2.0"
 
-  depends_on "python@3.12"
+  uses_from_macos "python"
 
   def install
-    libexec.install cached_download => "prompt-optimizer-mini-#{version}.vsix"
-    libexec.install "extension/package.json"
-    libexec.install "extension/scripts" => "scripts"
-    libexec.install "extension/bin" => "bin"
+    libexec.install "package.json"
+    libexec.install "scripts"
+    libexec.install "bin"
 
     bin.env_script_all_files libexec/"bin",
       PROMPT_OPTIMIZER_LITE_INSTALL_ROOT: libexec,
       PROMPT_OPTIMIZER_LITE_VERSION: version,
-      PROMPT_OPTIMIZER_LITE_VSIX: libexec/"prompt-optimizer-mini-#{version}.vsix",
-      PYTHON: Formula["python@3.12"].opt_bin/"python3"
+      PYTHON: "python3"
   end
 
   def caveats
     <<~EOS
-      Install the VS Code extension after installing the CLI:
+      This formula installs the lightweight PromptOpt CLI only.
+
+      Optional VS Code extension install:
         prompt-optimizer-lite install-extension
 
       Useful commands:
