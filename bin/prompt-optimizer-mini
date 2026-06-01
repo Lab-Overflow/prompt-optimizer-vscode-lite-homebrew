@@ -2,90 +2,17 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import os
 import shutil
 import subprocess
 import sys
-import time
 from pathlib import Path
 from typing import Iterable, Optional
 
 
 APP = "PromptOpt"
-
-FRAMES = [
-    (
-        r"""
-  .----------------------------------------------------------------.
-  |  ____                           _    ___        _              |
-  | |  _ \ _ __ ___  _ __ ___  _ __ | |_ / _ \ _ __ | |_           |
-  | | |_) | '__/ _ \| '_ ` _ \| '_ \| __| | | | '_ \| __|          |
-  | |  __/| | | (_) | | | | | | |_) | |_| |_| | |_) | |_           |
-  | |_|   |_|  \___/|_| |_| |_| .__/ \__|\___/| .__/ \__|          |
-  |                           |_|             |_|                  |
-  |----------------------------------------------------------------|
-  | [>] ignition      [ ] route matrix   [ ] prompt forge          |
-  |                                                                |
-  |        /\        homebrew cli core warming up                  |
-  |   ____/  \____   zero bundled models / zero node runtime       |
-  '----------------------------------------------------------------'
-"""
-    ),
-    (
-        r"""
-  .----------------------------------------------------------------.
-  |  ____                           _    ___        _              |
-  | |  _ \ _ __ ___  _ __ ___  _ __ | |_ / _ \ _ __ | |_           |
-  | | |_) | '__/ _ \| '_ ` _ \| '_ \| __| | | | '_ \| __|          |
-  | |  __/| | | (_) | | | | | | |_) | |_| |_| | |_) | |_           |
-  | |_|   |_|  \___/|_| |_| |_| .__/ \__|\___/| .__/ \__|          |
-  |                           |_|             |_|                  |
-  |----------------------------------------------------------------|
-  | [=] ignition      [>] route matrix   [ ] prompt forge          |
-  |                                                                |
-  |   [api]----\                                                   |
-  |   [vsc]-----+====> selecting fastest available route           |
-  |   [local]--/                                                   |
-  '----------------------------------------------------------------'
-"""
-    ),
-    (
-        r"""
-  .----------------------------------------------------------------.
-  |  ____                           _    ___        _              |
-  | |  _ \ _ __ ___  _ __ ___  _ __ | |_ / _ \ _ __ | |_           |
-  | | |_) | '__/ _ \| '_ ` _ \| '_ \| __| | | | '_ \| __|          |
-  | |  __/| | | (_) | | | | | | |_) | |_| |_| | |_) | |_           |
-  | |_|   |_|  \___/|_| |_| |_| .__/ \__|\___/| .__/ \__|          |
-  |                           |_|             |_|                  |
-  |----------------------------------------------------------------|
-  | [=] ignition      [=] route matrix   [>] prompt forge          |
-  |                                                                |
-  |       .---- constraints ----.                                  |
-  | raw --+---- structure ------+--> execution-ready prompt         |
-  |       '---- verification ---'                                  |
-  '----------------------------------------------------------------'
-"""
-    ),
-    (
-        r"""
-  .----------------------------------------------------------------.
-  |  ____                           _    ___        _              |
-  | |  _ \ _ __ ___  _ __ ___  _ __ | |_ / _ \ _ __ | |_           |
-  | | |_) | '__/ _ \| '_ ` _ \| '_ \| __| | | | '_ \| __|          |
-  | |  __/| | | (_) | | | | | | |_) | |_| |_| | |_) | |_           |
-  | |_|   |_|  \___/|_| |_| |_| .__/ \__|\___/| .__/ \__|          |
-  |                           |_|             |_|                  |
-  |----------------------------------------------------------------|
-  | [OK] ignition     [OK] route matrix  [OK] prompt forge         |
-  |                                                                |
-  |   >>>>>>>>>>>>>>>>>>> PROMPTOPT ONLINE <<<<<<<<<<<<<<<<<<       |
-  |          homebrew-native / lightweight / ready                  |
-  '----------------------------------------------------------------'
-"""
-    ),
-]
 
 
 def install_root() -> Path:
@@ -112,23 +39,24 @@ def local_manager(root: Path) -> Path:
     return root / "scripts" / "local_model_manager.py"
 
 
-def show_banner(enabled: bool = True) -> None:
+def animation_module(root: Path) -> Path:
+    return root / "scripts" / "promptopt_animation.py"
+
+
+def show_banner(root: Path, enabled: bool = True) -> None:
     if not enabled:
         return
-    stream = sys.stderr
-    if not stream.isatty():
-        print("PromptOpt :: homebrew-native prompt forge online", file=stream)
+    module_path = animation_module(root)
+    if not module_path.is_file():
+        print("PromptOpt :: homebrew-native prompt forge online", file=sys.stderr)
         return
-    clear = "\033[2J\033[H"
-    cyan = "\033[96m" if not os.environ.get("NO_COLOR") else ""
-    green = "\033[92m" if not os.environ.get("NO_COLOR") else ""
-    reset = "\033[0m" if not os.environ.get("NO_COLOR") else ""
-    for frame in FRAMES:
-        print(clear, end="", file=stream)
-        print(f"{cyan}{frame}{reset}", file=stream)
-        time.sleep(0.12)
-    print(clear, end="", file=stream)
-    print(f"{green}{FRAMES[-1]}{reset}", file=stream)
+    spec = importlib.util.spec_from_file_location("promptopt_animation", module_path)
+    if not spec or not spec.loader:
+        print("PromptOpt :: homebrew-native prompt forge online", file=sys.stderr)
+        return
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    module.show_banner(enabled=True)
 
 
 def run_python_script(root: Path, args: list[str], stdin: str = "") -> int:
@@ -213,7 +141,7 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
     parser.add_argument("--no-animation", action="store_true")
     args = parser.parse_args(raw_argv)
 
-    show_banner(not no_animation)
+    show_banner(root, not no_animation)
 
     if args.command in (None, "help", "--help", "-h"):
         print_help(root)

@@ -1,8 +1,8 @@
 class PromptOptimizerLite < Formula
   desc "Lightweight prompt optimizer CLI"
   homepage "https://github.com/Lab-Overflow/prompt-optimizer-vscode-lite-homebrew"
-  url "https://github.com/Lab-Overflow/prompt-optimizer-vscode-lite-homebrew/releases/download/v1.0.1/prompt-optimizer-lite-1.0.1.tar.gz"
-  sha256 "31b2b9c807bb11bcc7e7caaacc7df597c77a86a680c8c5e6a93bcf944c3509bc"
+  url "https://github.com/Lab-Overflow/prompt-optimizer-vscode-lite-homebrew/releases/download/v1.0.2/prompt-optimizer-lite-1.0.2.tar.gz"
+  sha256 "0ebad18099c46cc0f26916f54701cfed23a733c8b884bf746edae6ce72359733"
   license "Apache-2.0"
 
   uses_from_macos "python"

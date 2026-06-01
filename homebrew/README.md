@@ -10,22 +10,22 @@ This folder contains the formula for publishing Prompt Optimizer Lite through a 
 npm run package:homebrew
 ```
 
-2. Create a GitHub release named `v1.0.1` and upload:
+2. Create a GitHub release named `v1.0.2` and upload:
 
 ```text
-prompt-optimizer-lite-1.0.1.tar.gz
+prompt-optimizer-lite-1.0.2.tar.gz
 ```
 
 3. Verify the final tarball SHA matches the formula:
 
 ```bash
-shasum -a 256 prompt-optimizer-lite-1.0.1.tar.gz
+shasum -a 256 prompt-optimizer-lite-1.0.2.tar.gz
 ```
 
 Expected SHA for the current package:
 
 ```text
-31b2b9c807bb11bcc7e7caaacc7df597c77a86a680c8c5e6a93bcf944c3509bc
+0ebad18099c46cc0f26916f54701cfed23a733c8b884bf746edae6ce72359733
 ```
 
 4. Copy the formula into your tap repository:

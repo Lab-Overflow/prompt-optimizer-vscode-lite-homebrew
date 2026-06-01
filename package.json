@@ -2,7 +2,7 @@
   "name": "prompt-optimizer-mini",
   "displayName": "Prompt Optimizer Mini",
   "description": "Lightweight prompt optimizer with model routing, optional OpenAI-compatible APIs, and an on-demand local GGUF model.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "publisher": "fullstack1ape",
   "license": "Apache-2.0",
   "repository": {

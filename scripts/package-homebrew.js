@@ -20,6 +20,7 @@ const files = [
   "scripts/fallback_optimize.py",
   "scripts/few_shot_templates.json",
   "scripts/local_model_manager.py",
+  "scripts/promptopt_animation.py",
 ];
 
 for (const file of files) {
